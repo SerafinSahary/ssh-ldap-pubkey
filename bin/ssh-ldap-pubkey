@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -7,6 +7,7 @@ ssh-ldap-pubkey - Utility to manage SSH public keys stored in LDAP.
 Usage:
   ssh-ldap-pubkey list [-H URI...] [options]
   ssh-ldap-pubkey add [-H URI...] [options] FILE
+  ssh-ldap-pubkey copy -s SRCUSER [-H URI...] [options]
   ssh-ldap-pubkey del [-H URI...] [options] PATTERN
   ssh-ldap-pubkey --help
 
@@ -28,6 +29,7 @@ Options:
   -q --quiet             Be quiet.
   -u LOGIN --user=LOGIN  Login of the user to bind as and change public key(s)
                          (default is the current user).
+  -s SRCUSER --source=SRCUSER  source user to copy keys from.
   -v --version           Show version information.
   -h --help              Show this message.
 """
@@ -38,7 +40,7 @@ import sys
 from docopt import docopt
 from getpass import getpass, getuser
 from os import access, R_OK
-from ssh_ldap_pubkey import LdapSSH, Error, keyname
+from ssh_ldap_pubkey import LdapSSH, Error, PubKeyAlreadyExistsError, keyname
 from ssh_ldap_pubkey.config import LdapConfig
 from ssh_ldap_pubkey import __versionstr__
 
@@ -71,6 +73,11 @@ def halt(msg, code=1):
     exit(code)
 
 
+def warning(msg):
+    """Print warning message to stderr and carry on execution."""
+    print('Warning: ' + msg, file=sys.stderr)
+
+
 def info(msg, *args):
     """Print message to stderr unless we're quiet."""
     if not quiet:
@@ -84,6 +91,7 @@ def main(**kwargs):
     confpath = kwargs['--conf'] or DEFAULT_CONFIG_PATH
     login = kwargs['--user'] or getuser()
     passw = None
+    source = kwargs['--source']
 
     if not access(confpath, R_OK):
         info("Notice: Could not read config: %s; running with defaults.", confpath)
@@ -99,7 +107,7 @@ def main(**kwargs):
     if kwargs['--binddn']:
         conf.bind_dn = kwargs['--binddn']
         conf.bind_pass = getpass("Enter LDAP password for '%s': " % conf.bind_dn)
-    elif kwargs['add'] or kwargs['del']:
+    elif kwargs['add'] or kwargs['del'] or kwargs['copy']:
         passw = getpass("Enter login (LDAP) password for user '%s': " % login)
 
     ldapssh = LdapSSH(conf)
@@ -122,12 +130,22 @@ def main(**kwargs):
             else:
                 info('No keys found to delete.')
 
+        elif kwargs['copy']:
+            keys = ldapssh.find_pubkeys(source)
+
+            for pubkey in keys:
+                ldapssh.add_pubkey(login, passw, pubkey)
+                info("Key has been stored: %s", keyname(pubkey))
+
         else:  # list
             keys = ldapssh.find_pubkeys(login)
             if keys:
                 print('\n'.join(keys))
             else:
                 info('No public keys found.')
+
+    except PubKeyAlreadyExistsError as e:
+        warning(str(e))
 
     except Error as e:
         halt(str(e), e.code)
