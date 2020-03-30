@@ -15,3 +15,9 @@ dist/
 
 # Coverage report
 .coverage
+
+# PyCharm
+/.idea
+/etc/ldap_ls.conf
+*.swp
+*.pem
