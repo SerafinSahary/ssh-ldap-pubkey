@@ -134,8 +134,13 @@ def main(**kwargs):
             keys = ldapssh.find_pubkeys(source)
 
             for pubkey in keys:
-                ldapssh.add_pubkey(login, passw, pubkey)
-                info("Key has been stored: %s", keyname(pubkey))
+                try:
+                    ldapssh.add_pubkey(login, passw, pubkey)
+                    info("Key has been stored: %s", keyname(pubkey))
+                except PubKeyAlreadyExistsError as e2:
+                    warning(str(e2))
+                except Exception as e2:
+                    raise e2
 
         else:  # list
             keys = ldapssh.find_pubkeys(login)
@@ -143,9 +148,6 @@ def main(**kwargs):
                 print('\n'.join(keys))
             else:
                 info('No public keys found.')
-
-    except PubKeyAlreadyExistsError as e:
-        warning(str(e))
 
     except Error as e:
         halt(str(e), e.code)
