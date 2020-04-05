@@ -23,6 +23,7 @@ Options:
                          The ldap.conf is not required when at least --base is
                          provided.
   -D DN --binddn=DN      DN to bind with instead of the user's DN.
+  -W pass --bindpw=pass  password to bind with provided DN.
   -H URI... --uri=URI... URI of the LDAP server to connect; loaded from the
                          config file by default. If not defined even there,
                          then it defaults to ldap://localhost.
@@ -106,7 +107,10 @@ def main(**kwargs):
     # prompt for password
     if kwargs['--binddn']:
         conf.bind_dn = kwargs['--binddn']
-        conf.bind_pass = getpass("Enter LDAP password for '%s': " % conf.bind_dn)
+        if kwargs['--bindpw']:
+            conf.bind_pass = kwargs['--bindpw']
+        else:
+            conf.bind_pass = getpass("Enter LDAP password for '%s': " % conf.bind_dn)
     elif kwargs['add'] or kwargs['del'] or kwargs['copy']:
         passw = getpass("Enter login (LDAP) password for user '%s': " % login)
 
