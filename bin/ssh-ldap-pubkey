@@ -8,7 +8,7 @@ Usage:
   ssh-ldap-pubkey list [-H URI...] [options]
   ssh-ldap-pubkey add [-H URI...] [options] FILE
   ssh-ldap-pubkey copy -s SRCUSER [-H URI...] [options]
-  ssh-ldap-pubkey del [-H URI...] [options] PATTERN
+  ssh-ldap-pubkey del [-H URI...] [options] [PATTERN]
   ssh-ldap-pubkey --help
 
   -                      Read public key from stdin.
@@ -127,7 +127,10 @@ def main(**kwargs):
             info("Key has been stored: %s", keyname(pubkey))
 
         elif kwargs['del']:
-            keys = ldapssh.find_and_remove_pubkeys(login, passw, kwargs['PATTERN'])
+            if kwargs['PATTERN']:
+                keys = ldapssh.find_and_remove_pubkeys(login, passw, kwargs['PATTERN'])
+            else:
+                keys = ldapssh.find_and_remove_pubkeys(login, passw, '')
             if keys:
                 info('Deleted keys:')
                 print('\n'.join(keys))

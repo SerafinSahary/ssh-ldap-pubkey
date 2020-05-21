@@ -189,7 +189,10 @@ class LdapSSH(object):
         if password:
             self._bind(dn, password)
 
-        pubkeys = [key for key in self._find_pubkeys(dn) if pattern in key]
+        if pattern is '':
+            pubkeys = self._find_pubkeys(dn)
+        else:
+            pubkeys = [key for key in self._find_pubkeys(dn) if pattern in key]
         for key in pubkeys:
             self._remove_pubkey(dn, key)
 
