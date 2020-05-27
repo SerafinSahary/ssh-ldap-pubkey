@@ -21,11 +21,12 @@ except ImportError:
 
 setup(
     name='ssh-ldap-pubkey',
-    version='1.3.2',
-    url='https://github.com/jirutka/ssh-ldap-pubkey',
+    version='1.3.3',
+    python_requires='>=3',
+    url='https://github.com/SerafinSahary/ssh-ldap-pubkey',
     description='Utility to manage SSH public keys stored in LDAP.',
     long_description=read_md('README.md'),
-    author='Jakub Jirutka',
+    author='Jakub Jirutka, fixes Jaroslaw Wencel',
     author_email='jakub@jirutka.cz',
     license='MIT',
     packages=['ssh_ldap_pubkey'],
@@ -39,7 +40,6 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: POSIX',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
         'Topic :: System',
         'Topic :: Utilities'
