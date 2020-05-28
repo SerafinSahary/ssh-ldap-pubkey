@@ -177,6 +177,7 @@ class LdapSSH(object):
             password (Optional[str]): The user's password to bind with, or None
                 to not (re)bind with the user's credentials.
             pattern (str): The pattern specifying public keys to be removed.
+                If empty all keys from the user account are removed.
         Raises:
             UserEntryNotFoundError: If the ``login`` is not found.
             NoPubKeyFoundError: If no public key matching the ``pattern`` is found.
